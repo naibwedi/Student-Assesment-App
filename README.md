@@ -26,15 +26,15 @@ npm install npm@latest -g
 ```
 
 ## Installation
-**1. Clone the repo
+- **Clone the repo
 ```bash
 git clone https://github.com/naibwedi/Student-Assessment-App.git
 ```
-**Install NPM packages
+- **Install NPM packages
 ```bash
 npm install
 ```
-**Start the application
+- **Start the application
 ```bash
 npm start
 ```
