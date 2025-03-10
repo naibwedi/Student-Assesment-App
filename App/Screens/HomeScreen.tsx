@@ -7,7 +7,7 @@ export default function HomeScreen({ navigation }: { navigation: NavigationProp<
     <View style={styles.container}>
       <Text>Home Screen</Text>
       <Button
-            style={styles.btnStudent}
+          
             title="Go to List Student"
             onPress={() => navigation.navigate('ListStudent')}
 
@@ -28,7 +28,7 @@ const styles = StyleSheet.create({
     gap: 10,
 
   },
-  btnStudent: {
+  Button: {
     margin: 10,
   },
 });
