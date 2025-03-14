@@ -10,9 +10,23 @@ The Student Assessment App is a React Native application designed to help educat
 - **Add Assessments**: Input results for each student.
 
 ## App design 
-![image](https://github.com/user-attachments/assets/521ea68b-dd52-444c-ad4f-41cae3ff4bfb)
-![image](https://github.com/user-attachments/assets/7d3d28cb-8f13-470a-b003-bbc257c97a85)
-![image](https://github.com/user-attachments/assets/6f05f000-4db3-47d6-918a-ed38fbcd7559)
+![image](https://github.com/user-attachments/assets/e1a0ccc6-6d58-4c6a-acea-b9e048ca8291)
+![image](https://github.com/user-attachments/assets/393308a7-1969-42c7-8396-2644758456f8)
+![image](https://github.com/user-attachments/assets/3b70e24c-f354-40c1-b2b1-1dfb8695df59)
+![image](https://github.com/user-attachments/assets/7e3fe081-3a58-4780-bf09-5bebe8d37d11)
+
+![image](https://github.com/user-attachments/assets/b0f55fdb-44e5-4836-a8ea-8ecc9e6da356)
+![image](https://github.com/user-attachments/assets/b12cf0f1-2793-4543-8823-d3096e67fc42)
+![image](https://github.com/user-attachments/assets/9dd2ff6d-e9b9-4400-837d-ca808c2985aa)
+![image](https://github.com/user-attachments/assets/2cca9e2d-b7f5-4636-adbb-fe7ae3701ba3)
+
+
+
+
+
+
+
+
 
 
 ## Getting Started
