@@ -1,38 +1,93 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, StyleSheet, Alert } from 'react-native';
-import CustomTextInput from '../../components/CustomTextInput';
-import CustomButton from '../../components/CustomButton';
-import { useNavigation } from '@react-navigation/native';
-import { collection, query, where, getDocs, deleteDoc, doc } from 'firebase/firestore';
-import  db  from '../../firebaseConfig';
+import React, { useEffect, useState, useCallback } from "react";
+import { useFocusEffect } from "@react-navigation/native";
+import { View, Text, FlatList, StyleSheet, Alert } from "react-native";
+import { useNavigation } from "@react-navigation/native";
+import {
+  collection,
+  query,
+  where,
+  getDocs,
+  deleteDoc,
+  doc,
+  getDoc,
+} from "firebase/firestore";
+import db from "../../firebaseConfig";
+import CustomTextInput from "../../components/CustomTextInput";
+import CustomButton from "../../components/CustomButton";
+import { ListItem, Button, Icon } from "react-native-elements";
 
 export default function ListStudentScreen() {
   const navigation = useNavigation();
   const [students, setStudents] = useState<any[]>([]);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
 
-  useEffect(() => {
-    fetchStudents();
-  }, [searchTerm]);
-
-  const fetchStudents = async () => {
+  // 1) Moved fetch logic outside useEffect
+  const fetchStudents = async (search: string) => {
     const studentsCollection = collection(db, "students");
-    const q = searchTerm ? query(studentsCollection, where("name", ">=", searchTerm), where("name", "<=", searchTerm + '\uf8ff')) : studentsCollection;
+    const q = search
+      ? query(
+          studentsCollection,
+          where("name", ">=", search),
+          where("name", "<=", search + "\uf8ff")
+        )
+      : studentsCollection;
+
     const querySnapshot = await getDocs(q);
-    setStudents(querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+    setStudents(
+      querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }))
+    );
   };
 
+  // 2) In useEffect, just call fetchStudents
+  useFocusEffect(
+    useCallback(() => {
+      fetchStudents(searchTerm); // 🔄 Refresh when screen comes into focus
+    }, [searchTerm])
+  );
+
   const handleDelete = (studentId: string) => {
-    Alert.alert("Confirm Delete", "Are you sure you want to delete this student?", [
-      { text: "Cancel", style: "cancel" },
-      { text: "OK", onPress: () => deleteStudent(studentId) },
-    ]);
+    console.log("Delete button clicked for student ID:", studentId);
+    Alert.alert(
+      "Confirm Delete",
+      "Are you sure you want to delete this student?",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "OK",
+          onPress: () => {
+            console.log("Delete confirmed for student ID:", studentId);
+            deleteStudent(studentId);
+          },
+        },
+      ]
+    );
   };
 
   const deleteStudent = async (studentId: string) => {
-    await deleteDoc(doc(db, "students", studentId));
-    fetchStudents();  // Refresh the list after deletion
+    try {
+      // Fetch all courses to find grades linked to the student
+      const coursesSnapshot = await getDocs(collection(db, "courses"));
+  
+      for (const courseDoc of coursesSnapshot.docs) {
+        const gradesCollectionRef = collection(db, `courses/${courseDoc.id}/grades`);
+        const gradeDocRef = doc(gradesCollectionRef, studentId);
+        
+        // Check if grade exists for this student in the course and delete it
+        const gradeDocSnap = await getDoc(gradeDocRef);
+        if (gradeDocSnap.exists()) {
+          await deleteDoc(gradeDocRef);
+        }
+      }
+  
+      // Now delete the student document
+      await deleteDoc(doc(db, "students", studentId));
+      console.log("Student and their grades deleted successfully.");
+      fetchStudents(); // Refresh list after deletion
+    } catch (error) {
+      console.error("Error deleting student and grades:", error);
+    }
   };
+  
 
   return (
     <View style={styles.container}>
@@ -43,17 +98,41 @@ export default function ListStudentScreen() {
       />
       <FlatList
         data={students}
-        keyExtractor={item => item.id}
+        keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
-          <View style={styles.studentItem}>
-            <Text style={styles.studentText}>{item.name} | Age: {item.age}</Text>
-            <CustomButton title="Delete" onPress={() => handleDelete(item.id)} color="red" />
-          </View>
+          <ListItem bottomDivider>
+            <ListItem.Content>
+              <ListItem.Title>{item.name}</ListItem.Title>
+              <ListItem.Subtitle>Age: {item.age}</ListItem.Subtitle>
+            </ListItem.Content>
+            <Button
+            title={" Edit"}
+              icon={
+                <Icon name="edit" type="font-awesome" size={16} color="#fff" />
+              }
+              // 3) pass refreshList as an arrow fn calling fetch
+              onPress={() =>
+                navigation.navigate("EditStudent", {
+                  studentId: item.id,
+                })
+              }
+            />
+            <Button
+             title=" Delete"
+              icon={
+                <Icon name="trash"  type="font-awesome" size={16} color="#fff" />
+              }
+              
+              buttonStyle={styles.deleteButton}
+              onPress={() => handleDelete(item.id)}
+              buttonStyle={{ backgroundColor: "red" }}
+            />
+          </ListItem>
         )}
       />
       <CustomButton
         title="Add Student"
-        onPress={() => navigation.navigate('AddStudent')}
+        onPress={() => navigation.navigate("AddStudent")}
       />
     </View>
   );
@@ -63,14 +142,5 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-  },
-  studentItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 10,
-  },
-  studentText: {
-    flex: 1,
   },
 });

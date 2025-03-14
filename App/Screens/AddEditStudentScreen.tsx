@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { db } from '../../firebaseConfig'; 
+import  db  from '../../firebaseConfig'; 
 import { collection, addDoc } from 'firebase/firestore'; // Make sure these imports are correct
 
 
